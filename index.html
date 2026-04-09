@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HM PQS Study App — NAVEDTRA 43699-2A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Source+Code+Pro:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f4f7fb;
+  --bg2:      #ffffff;
+  --bg3:      #edf1f7;
+  --bg4:      #e2e8f2;
+  --border:   #d0daea;
+  --border2:  #b8c8de;
+  --text:     #1a2a3a;
+  --text2:    #3a5472;
+  --text3:    #6a88a8;
+  --green:    #007a42;
+  --green2:   #00a855;
+  --green-bg: #e6f4ee;
+  --green-lt: #f0faf4;
+  --blue:     #005fa3;
+  --blue2:    #007acc;
+  --blue-bg:  #e8f3fc;
+  --blue-lt:  #f0f8ff;
+  --amber:    #7a4800;
+  --amber2:   #c07d10;
+  --amber-bg: #fef6e4;
+  --amber-lt: #fffbf0;
+  --red:      #b52a1c;
+  --red-bg:   #fdecea;
+  --purple:   #5b1a96;
+  --purple-bg:#f5f0ff;
+  --card-shadow: 0 2px 10px rgba(0,50,100,0.08);
+  --radius: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 16px; min-height: 100vh; overflow-x: hidden; }
+
+/* HEADER */
+.app-header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 20px; box-shadow: 0 1px 8px rgba(0,50,100,0.07); }
+.header-inner { max-width: 920px; margin: 0 auto; display: flex; align-items: center; gap: 16px; height: 58px; }
+.app-logo { font-family: 'Rajdhani', sans-serif; font-size: 22px; font-weight: 700; color: var(--blue); letter-spacing: 2px; flex-shrink: 0; }
+.app-logo span { color: var(--green2); }
+.header-progress { flex: 1; display: flex; align-items: center; gap: 10px; }
+.progress-bar-wrap { flex: 1; height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--green2), var(--blue2)); transition: width 0.5s ease; }
+.progress-label { font-family: 'Source Code Pro', monospace; font-size: 13px; color: var(--text3); white-space: nowrap; }
+.key-btn { background: var(--bg3); border: 1px solid var(--border2); color: var(--text2); padding: 6px 13px; border-radius: 5px; font-size: 13px; font-family: 'Source Code Pro', monospace; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.key-btn:hover { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+
+/* TABS */
+.tabs-wrap { background: rgba(255,255,255,0.93); border-bottom: 1px solid var(--border); position: sticky; top: 58px; z-index: 99; }
+.tabs { max-width: 920px; margin: 0 auto; display: flex; padding: 0 20px; }
+.tab { padding: 13px 22px; font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 15px; letter-spacing: 1px; cursor: pointer; border-bottom: 3px solid transparent; color: var(--text3); transition: all 0.2s; white-space: nowrap; }
+.tab[data-tab="fundamentals"].active  { color: var(--green); border-bottom-color: var(--green); }
+.tab[data-tab="systems"].active       { color: var(--blue);  border-bottom-color: var(--blue); }
+.tab[data-tab="watchstations"].active { color: var(--amber); border-bottom-color: var(--amber); }
+.tab-badge { display: inline-block; margin-left: 6px; background: var(--bg3); border-radius: 10px; padding: 1px 8px; font-size: 12px; font-family: 'Source Code Pro', monospace; color: var(--text3); }
+
+/* MAIN */
+.main { max-width: 920px; margin: 0 auto; padding: 20px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* SECTION BLOCK */
+.section-block { margin-bottom: 14px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; background: var(--bg2); box-shadow: var(--card-shadow); }
+.section-header { display: flex; align-items: center; gap: 12px; padding: 14px 18px; cursor: pointer; background: var(--bg3); user-select: none; transition: background 0.15s; }
+.section-header:hover { background: var(--bg4); }
+.section-num { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 1px; min-width: 44px; }
+.section-title { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 17px; flex: 1; }
+.section-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.section-progress-mini { width: 80px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.section-progress-fill { height: 100%; border-radius: 2px; transition: width 0.4s; }
+.section-count { font-family: 'Source Code Pro', monospace; font-size: 12px; color: var(--text3); }
+.section-chevron { color: var(--text3); transition: transform 0.2s; font-size: 13px; }
+.section-block.expanded .section-chevron { transform: rotate(90deg); }
+.section-items { display: none; }
+.section-block.expanded .section-items { display: block; }
+
+/* LINE ITEM */
+.line-item { border-top: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+.line-item:hover { background: var(--bg3); }
+.line-item.done { background: var(--green-lt); }
+.line-item.done .item-id { color: var(--green); }
+.item-row { display: flex; align-items: flex-start; gap: 10px; padding: 11px 18px; }
+.item-id { font-family: 'Source Code Pro', monospace; font-size: 13px; color: var(--text3); min-width: 52px; padding-top: 2px; flex-shrink: 0; }
+.item-text { flex: 1; line-height: 1.55; color: var(--text); font-size: 15px; }
+.item-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.done-btn { font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border2); background: var(--bg2); cursor: pointer; font-family: 'Source Code Pro', monospace; color: var(--text3); transition: all 0.2s; }
+.done-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-bg); }
+.line-item.done .done-btn { color: var(--green); border-color: var(--green2); background: var(--green-bg); }
+.study-btn { font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border2); background: var(--bg2); cursor: pointer; font-family: 'Source Code Pro', monospace; color: var(--blue); transition: all 0.2s; }
+.study-btn:hover { background: var(--blue-bg); border-color: var(--blue); }
+
+/* STUDY PANEL */
+.study-panel { display: none; border-top: 2px solid var(--border); padding: 18px; background: var(--bg); animation: slideDown 0.2s ease; }
+.study-panel.open { display: block; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+.study-loading { text-align: center; padding: 36px; color: var(--text3); font-family: 'Source Code Pro', monospace; font-size: 14px; }
+.loading-dots::after { content: '.'; animation: dots 1.2s infinite; }
+@keyframes dots { 0%,100%{content:'.'} 33%{content:'..'} 66%{content:'...'} }
+
+/* EXPORT BUTTON */
+.export-bar { display: flex; justify-content: flex-end; margin-bottom: 14px; }
+.export-btn { display: flex; align-items: center; gap: 7px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 6px; padding: 8px 18px; font-size: 15px; font-family: 'Inter', sans-serif; font-weight: 500; color: var(--text2); cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 4px rgba(0,50,100,0.06); }
+.export-btn:hover { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+.export-btn.copied { background: var(--green-bg); border-color: var(--green2); color: var(--green); }
+
+/* STUDY CARDS */
+.study-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.study-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: 0 1px 4px rgba(0,50,100,0.05); }
+.study-card.full { grid-column: 1 / -1; }
+.card-label { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 9px; }
+.card-label.green  { color: var(--green); }
+.card-label.blue   { color: var(--blue); }
+.card-label.amber  { color: var(--amber2); }
+.card-label.purple { color: var(--purple); }
+.card-label.red    { color: var(--red); }
+.card-text { color: var(--text); line-height: 1.65; font-size: 15px; }
+
+/* References */
+.ref-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.ref-pill { display: flex; align-items: center; border-radius: 5px; border: 1px solid var(--border2); overflow: hidden; }
+.ref-code { background: var(--blue-bg); padding: 4px 9px; font-family: 'Source Code Pro', monospace; color: var(--blue); border-right: 1px solid var(--border2); font-size: 12px; }
+.ref-name { padding: 4px 9px; color: var(--text2); font-size: 13px; }
+
+/* Key points */
+.key-points { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+.key-points li { display: flex; align-items: flex-start; gap: 8px; font-size: 15px; line-height: 1.55; color: var(--text); }
+.key-points li::before { content: '▸'; color: var(--green); flex-shrink: 0; padding-top: 2px; }
+
+/* Qualify tips */
+.qualify-list { display: flex; flex-direction: column; gap: 9px; }
+.qualify-item { display: flex; gap: 9px; align-items: flex-start; font-size: 15px; line-height: 1.55; }
+.qualify-num { font-family: 'Source Code Pro', monospace; font-size: 12px; background: var(--amber-bg); color: var(--amber2); border: 1px solid #deb060; border-radius: 4px; padding: 2px 8px; flex-shrink: 0; margin-top: 2px; }
+
+/* Mnemonic */
+.mnemonic-box { background: var(--purple-bg); border: 1px solid #c4b5fd; border-radius: 6px; padding: 12px 15px; font-family: 'Source Code Pro', monospace; color: var(--purple); font-size: 14px; line-height: 1.65; }
+
+/* VISUALS */
+.acronym-grid { display: flex; flex-direction: column; gap: 5px; }
+.acronym-row { display: flex; align-items: stretch; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.acro-letter { min-width: 40px; padding: 9px 10px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 21px; text-align: center; background: var(--bg3); flex-shrink: 0; }
+.acro-meaning { flex: 1; padding: 9px 14px; background: var(--bg2); font-size: 15px; line-height: 1.45; color: var(--text); border-left: 1px solid var(--border); display: flex; align-items: center; }
+
+.steps-list { display: flex; flex-direction: column; }
+.step-row { display: flex; align-items: flex-start; position: relative; }
+.step-row:not(:last-child)::after { content: ''; position: absolute; left: 17px; top: 36px; width: 1px; height: calc(100% - 10px); background: var(--border2); }
+.step-num { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; background: var(--blue-bg); border: 2px solid var(--blue); font-family: 'Source Code Pro', monospace; font-size: 13px; color: var(--blue); display: flex; align-items: center; justify-content: center; z-index: 1; margin-top: 6px; }
+.step-text { flex: 1; padding: 9px 14px; font-size: 15px; color: var(--text); line-height: 1.5; }
+
+.visual-table { width: 100%; border-collapse: collapse; font-size: 15px; }
+.visual-table th { background: var(--blue); color: #fff; padding: 9px 12px; text-align: left; font-family: 'Rajdhani', sans-serif; font-weight: 600; letter-spacing: 0.5px; font-size: 15px; }
+.visual-table td { padding: 8px 12px; color: var(--text); border-bottom: 1px solid var(--border); }
+.visual-table tr:last-child td { border-bottom: none; }
+.visual-table tr:nth-child(even) td { background: var(--bg3); }
+
+.comparison-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.comp-card { flex: 1; min-width: 130px; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+.comp-header { padding: 9px 12px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 16px; }
+.comp-points { padding: 8px 12px; display: flex; flex-direction: column; gap: 5px; background: var(--bg2); }
+.comp-pt { font-size: 14px; line-height: 1.45; color: var(--text); display: flex; gap: 6px; }
+.comp-pt::before { content: '·'; flex-shrink: 0; color: var(--text3); }
+
+.flow-list { display: flex; flex-direction: column; gap: 6px; }
+.flow-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; padding: 10px 16px; font-size: 15px; color: var(--text); width: 100%; }
+.flow-arrow { color: var(--text3); font-size: 18px; padding-left: 14px; }
+
+.tags-groups { display: flex; flex-direction: column; gap: 12px; }
+.tag-group-label { font-family: 'Rajdhani', sans-serif; font-weight: 600; font-size: 14px; letter-spacing: 1px; margin-bottom: 5px; }
+.tag-items { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-item { padding: 4px 11px; border-radius: 13px; font-size: 13px; border: 1px solid; font-family: 'Source Code Pro', monospace; }
+
+.study-error { background: var(--red-bg); border: 1px solid #f5b7b1; border-radius: 6px; padding: 15px; color: var(--red); font-size: 15px; line-height: 1.6; }
+
+/* API KEY MODAL */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(10,20,40,0.45); backdrop-filter: blur(4px); z-index: 200; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--bg2); border: 1px solid var(--border2); border-radius: 12px; padding: 34px; max-width: 430px; width: 90%; box-shadow: 0 12px 48px rgba(0,50,100,0.18); animation: fadeUp 0.25s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.modal-logo { font-family: 'Rajdhani', sans-serif; font-size: 24px; font-weight: 700; color: var(--blue); letter-spacing: 2px; margin-bottom: 6px; }
+.modal h2 { font-family: 'Rajdhani', sans-serif; font-size: 20px; margin-bottom: 9px; color: var(--text); }
+.modal p { color: var(--text2); font-size: 15px; line-height: 1.7; margin-bottom: 20px; }
+.modal input { width: 100%; background: var(--bg3); border: 1px solid var(--border2); border-radius: 6px; padding: 11px 14px; color: var(--text); font-family: 'Source Code Pro', monospace; font-size: 14px; margin-bottom: 14px; outline: none; }
+.modal input:focus { border-color: var(--blue); background: var(--blue-lt); }
+.modal-btn { width: 100%; background: var(--blue); color: #fff; border: none; border-radius: 6px; padding: 12px; font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: 1px; cursor: pointer; transition: background 0.2s; }
+.modal-btn:hover { background: var(--blue2); }
+.modal-note { font-size: 13px; color: var(--text3); margin-top: 11px; text-align: center; line-height: 1.5; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; right: 24px; z-index: 300; background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px; padding: 11px 18px; font-size: 15px; font-family: 'Inter', sans-serif; color: var(--green); opacity: 0; transition: opacity 0.3s; pointer-events: none; box-shadow: var(--card-shadow); }
+.toast.show { opacity: 1; }
+
+@media (max-width: 600px) {
+  .study-grid { grid-template-columns: 1fr; }
+  .study-card.full { grid-column: 1; }
+  .tabs { overflow-x: auto; }
+  .tab { padding: 13px 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-logo">HM·PQS</div>
+    <h2>API Key Required</h2>
+    <p>This app uses Claude AI to generate study briefs for each PQS line item. Enter your Anthropic API key to get started — it's stored locally in your browser only.</p>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." />
+    <button class="modal-btn" onclick="saveApiKey()">SAVE & LAUNCH</button>
+    <div class="modal-note">Key stored in localStorage only — never leaves your device.<br>Get yours at console.anthropic.com</div>
+  </div>
+</div>
+
+<header class="app-header">
+  <div class="header-inner">
+    <div class="app-logo">HM·<span>PQS</span></div>
+    <div class="header-progress">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="globalProgressBar" style="width:0%"></div></div>
+      <div class="progress-label" id="globalProgressLabel">0 / 0</div>
+    </div>
+    <button class="key-btn" onclick="document.getElementById('apiModal').classList.add('open')">⚙ API KEY</button>
+  </div>
+</header>
+
+<nav class="tabs-wrap">
+  <div class="tabs">
+    <div class="tab active" data-tab="fundamentals" onclick="switchTab('fundamentals')">FUNDAMENTALS <span class="tab-badge" id="badge-fundamentals">0</span></div>
+    <div class="tab" data-tab="systems" onclick="switchTab('systems')">SYSTEMS <span class="tab-badge" id="badge-systems">0</span></div>
+    <div class="tab" data-tab="watchstations" onclick="switchTab('watchstations')">WATCHSTATIONS <span class="tab-badge" id="badge-watchstations">0</span></div>
+  </div>
+</nav>
+
+<main class="main">
+  <div class="tab-panel active" id="panel-fundamentals"></div>
+  <div class="tab-panel" id="panel-systems"></div>
+  <div class="tab-panel" id="panel-watchstations"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PQS = {
+  fundamentals: [
+    { id:"101", title:"Safety Fundamentals", color:"var(--green)",
+      refs:["OPNAVINST 3500.39","OPNAVINST 5100.19","SECNAVINST 5100.10","BUMEDINST 6280.1","OPNAVINST 5100.28","BUMEDINST 3300.1","BUMEDINST 6620.9","NAVEDTRA 14295B"],
+      items:[
+        {id:"101.1",text:"Discuss the concept of ORM.",hint:"acronym"},
+        {id:"101.2",text:"Explain the elements of ORM: (a) Identifying hazards (b) Assessing hazards (c) Making risk decisions (d) Implementing controls (e) Supervising",hint:"steps"},
+        {id:"101.3",text:"What are the four principles of ORM?",hint:"tags"},
+        {id:"101.4",text:"Explain the hazards of medical gas cylinder storage in patient care spaces.",hint:"table"},
+        {id:"101.5",text:"Discuss safety precautions and PPE required for: (a) Spill procedures (b) Chemical procedures",hint:"comparison"},
+        {id:"101.6",text:"Discuss the safety precautions associated with handling SHARPS.",hint:"steps"},
+        {id:"101.7",text:"Discuss the procedure/protocol for needle stick incidents.",hint:"steps"},
+        {id:"101.8",text:"Discuss steps for disposal of regulated medical waste: (a) Document (b) Prepare (c) Sort & package (d) Transportation",hint:"steps"},
+        {id:"101.9",text:"Explain the purpose of the regulated medical waste program.",hint:"tags"},
+        {id:"101.10",text:"Discuss the purpose of the Hearing Conservation Program (HCP).",hint:"table"},
+        {id:"101.11",text:"Define infection control terms: chain of infection, virulence, reservoir, latent infection, infectious disease, direct/indirect/droplet contact, immunity, universal/standard precautions, blood-borne disease, occupational exposure, percutaneous, PPE, patient isolation.",hint:"tags"},
+        {id:"101.12",text:"What is the purpose of the Healthcare-Associated Infection Prevention and Control Program (HAIPC)?",hint:"tags"}
+      ]},
+    { id:"102", title:"Healthcare Administration Fundamentals", color:"var(--green)",
+      refs:["NAVMEDCOMINST 6320.16","NAVEDTRA 14295B","MANMED NAVMED P-117 Ch16","AHLTA User Guide 3.3","MRRS","CarePoint 4G MHSPHP","DENCAS","MANMED NAVMED P-117 Ch15","Joint Commission CAM 2017","BUMEDINST 6440.5"],
+      items:[
+        {id:"102.1",text:"State the purpose of the Terminal Digit Filing System (TDFS).",hint:"table"},
+        {id:"102.2",text:"Explain the health records annual verification process.",hint:"steps"},
+        {id:"102.3",text:"Discuss the Military Health Treatment Record Jacket: folder selection, patient ID data, summary info, DD Form 2005, occupational health data, computer-generated forms, SF 601, SF 603, DD 2807-1, DD 2808, NAVMED 6150/4, OPNAV 5211/9.",hint:"table"},
+        {id:"102.4",text:"Define patient privacy terms: HIPAA, PII, Privacy Act of 1974, informed consent, lawful consent.",hint:"tags"},
+        {id:"102.5",text:"Discuss required information for: SF 600, NAVMED 6150/2, DD Form 2215, DD Form 2808, DD Form 2807-1, NAVMED 6120/4 (PHA).",hint:"table"},
+        {id:"102.6",text:"Explain health record parts: Part 1 (Preventive Med/Occ Health), Part 2 (Medical Care/Treatment), Part 3 (Physical Qualifications/Admin), Part 4 (Ancillary Studies).",hint:"comparison"},
+        {id:"102.7",text:"Explain criteria for closing a health record: death, discharge, resignation, release from active duty, retirement, Fleet Reserve transfer, MIA, desertion, disenrollment.",hint:"tags"},
+        {id:"102.8",text:"Explain AHLTA/CHCS functionalities: demographics, health history, laboratory, radiology, clinical notes, previous encounters.",hint:"table"},
+        {id:"102.9",text:"Explain AHLTA/CHCS administrative tools: screening, vital signs, subjective/objective, assessment/plan, order sets, disposition, telephone consults.",hint:"steps"},
+        {id:"102.10",text:"Explain AHLTA/CHCS fields: DEERS registration, appointments, end-of-day processing, radiology, lab, schedule, walk-in, appointment roster, ADT, telephone consult.",hint:"table"},
+        {id:"102.11",text:"Explain the purpose of physical examination for military service members.",hint:"tags"},
+        {id:"102.12",text:"Explain types of qualifying exams: overseas/operational, PHA, special duty, occupational health, separation.",hint:"comparison"},
+        {id:"102.13",text:"Discuss periodic physical exam criteria: special duty/high risk, overseas/operational, occupational health, enlistment, commissioning, separation.",hint:"table"},
+        {id:"102.14",text:"Discuss the healthcare systems utilized at your command.",hint:"comparison"},
+        {id:"102.15",text:"Explain the purpose of the Joint Commission.",hint:"tags"},
+        {id:"102.16",text:"Discuss the Navy Medicine Augmentation Program.",hint:"tags"}
+      ]},
+    { id:"103", title:"Medical Assessment Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","BUMEDINST 6320.83","BUMEDINST 6550.9","Seidel's Guide 8th Ed","DoDI 6000.14","BUMEDINST 6010.13","SECNAVINST 6120.3"],
+      items:[
+        {id:"103.1",text:"Discuss patients' rights and responsibilities.",hint:"tags"},
+        {id:"103.2",text:"Discuss patient communication: (a) Verbal (b) Non-verbal (c) Contact point",hint:"comparison"},
+        {id:"103.3",text:"Explain the purpose of provision standbys during medical examinations.",hint:"tags"},
+        {id:"103.4",text:"Explain the components of the SOAP note associated with a physical examination encounter.",hint:"acronym"},
+        {id:"103.5",text:"Discuss patient history components: LMP, past medical/surgical history, allergies, medications, family history, social history, Review of Systems (ROS).",hint:"tags"},
+        {id:"103.6",text:"Discuss HPI interview using OLDCARTS: chief complaint, description, chronology, review charts, pertinent positives, pertinent negatives.",hint:"acronym"},
+        {id:"103.7",text:"Define HPI terms: OLDCARTS chief complaint, description, chronology, chart review, pertinent positives, pertinent negatives.",hint:"acronym"},
+        {id:"103.8",text:"Define pain description terms using OPQRST: Onset, Provocation/palliation, Quality, Radiates, Severity, Timing.",hint:"acronym"},
+        {id:"103.9",text:"Discuss the screening procedures for a medical appointment.",hint:"steps"}
+      ]},
+    { id:"104", title:"Military Medical Examinations Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","MANMED NAVMED P-117 Ch15","BUMEDINST 6550.9","Seidel's Guide 8th Ed","BUMEDINST 6320.83","SECNAVINST 6120.3","MANMED NAVMED P-117 Ch16"],
+      items:[
+        {id:"104.1",text:"Discuss the procedures for conducting a primary assessment.",hint:"steps"},
+        {id:"104.2",text:"Discuss the procedure for conducting a secondary assessment (DCAP-BTLS).",hint:"acronym"},
+        {id:"104.3",text:"Discuss normal and abnormal adult vital signs: blood pressure, respiratory rate, pulse rate, temperature.",hint:"table"},
+        {id:"104.4",text:"Describe environmental factors that affect vital signs.",hint:"tags"},
+        {id:"104.5",text:"Explain the process of obtaining orthostatic blood pressure.",hint:"steps"},
+        {id:"104.6",text:"Define physical exam terms: inspection, auscultation, palpation, percussion.",hint:"comparison"},
+        {id:"104.7",text:"Define DCAP-BTLS: Deformities, Contusions, Abrasions, Punctures/penetrations, Burns, Tenderness, Lacerations, Swelling.",hint:"acronym"},
+        {id:"104.8",text:"Discuss physical exam components: vital signs, general appearance, visual/motor acuity, HEENT, cardiovascular, pulmonary, abdominal, GU, MSK, derm, neuro, dental, endocrine, mental health.",hint:"tags"},
+        {id:"104.9",text:"Discuss normal assessment findings for all body systems.",hint:"table"},
+        {id:"104.10",text:"Discuss abnormal assessment findings for all body systems.",hint:"comparison"},
+        {id:"104.11",text:"Describe documentation for dietary intake/output: food/fluid and bowel movement.",hint:"table"},
+        {id:"104.12",text:"Describe operating procedures for: Snellen charts, Jaeger cards, FALANT, AFVT, pseudo isochromatic plates, audiogram, EKG/ECG.",hint:"table"},
+        {id:"104.13",text:"Discuss inpatient assessment concepts: change of shift, pre/post treatments, PRN.",hint:"comparison"}
+      ]},
+    { id:"105", title:"Medical Diagnosis & Treatment Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","BUMEDINST 6550.9","BUMEDINST 6230.15","Mosby Online Clinical Skills","Seidel's Guide 8th Ed","NAVMED P-5095","BUMEDINST 6110.13","Pulmo-Aide Operators Guide"],
+      items:[
+        {id:"105.1",text:"Discuss criteria for emergent referral: dislocation, fracture, stroke, head trauma.",hint:"comparison"},
+        {id:"105.2",text:"Discuss criteria for urgent referral: dislocation, fracture, infection, fever.",hint:"comparison"},
+        {id:"105.3",text:"Discuss the principles of documenting inpatient care.",hint:"steps"},
+        {id:"105.4",text:"Describe symptoms & treatment for: asthma, pneumonia, angina, MI, stroke, DVT/PE, cholecystitis, appendicitis, cellulitis, major depressive disorder.",hint:"table"},
+        {id:"105.5",text:"Describe treatment for cardiopulmonary conditions: PE, COPD, spontaneous pneumothorax, hypertension, CHF, cardiac arrest.",hint:"comparison"},
+        {id:"105.6",text:"Describe shock types — symptoms & treatment: hypovolemic, anaphylactic, neurogenic, cardiogenic, septic.",hint:"comparison"},
+        {id:"105.7",text:"Discuss wound management: primary/secondary/tertiary closure, I&D, wound plan, dressing change, tourniquet, sutures & staples.",hint:"steps"},
+        {id:"105.8",text:"Discuss the treatment for internal hemorrhaging.",hint:"steps"},
+        {id:"105.9",text:"Discuss the treatment for external hemorrhaging.",hint:"steps"},
+        {id:"105.10",text:"Discuss treatment for: soft tissue injuries, blunt force trauma, penetrating wounds, shock.",hint:"comparison"},
+        {id:"105.11",text:"Discuss cardiovascular medical equipment: emergency, clinic, post-op settings.",hint:"table"},
+        {id:"105.12",text:"Describe airway adjuncts: oropharyngeal (OPA), nasopharyngeal (NPA), suctioning.",hint:"comparison"},
+        {id:"105.13",text:"Describe splinting devices: pneumatic/air, padded boards, traction splints, Sam splint.",hint:"comparison"},
+        {id:"105.14",text:"Discuss the rationale for intravenous therapy.",hint:"tags"},
+        {id:"105.15",text:"Discuss IV therapy administration procedures.",hint:"steps"},
+        {id:"105.16",text:"Discuss adverse reactions associated with IV therapy.",hint:"table"},
+        {id:"105.17",text:"Discuss nebulizer treatment administration procedures.",hint:"steps"},
+        {id:"105.18",text:"Discuss alarm, temperature, and external audio checks for vaccine refrigerators.",hint:"steps"},
+        {id:"105.19",text:"Discuss health wellness & promotion programs: nutrition, physical activity, sexual health, tobacco, alcohol, mental wellness, weight control, stress/anger management.",hint:"tags"},
+        {id:"105.20",text:"Describe prescribed diet types: bland, high/low calorie, high/low protein, high/low residue, low sodium.",hint:"table"},
+        {id:"105.21",text:"Discuss the purpose of a 'Time Out' before a procedure.",hint:"tags"},
+        {id:"105.22",text:"Discuss steps for: ingrown toenail, skin biopsy, localized cryotherapy, sutures, staples.",hint:"steps"},
+        {id:"105.23",text:"Discuss urinary catheterization techniques and care management.",hint:"steps"},
+        {id:"105.24",text:"Describe treatment associated with drug intoxications/poisoning.",hint:"steps"},
+        {id:"105.25",text:"Discuss the procedure for flushing dental dry socket.",hint:"steps"},
+        {id:"105.26",text:"Explain the procedures for performing an ECG/EKG.",hint:"steps"},
+        {id:"105.27",text:"Explain procedures for insertion, care, and removal of a urinary catheter.",hint:"steps"}
+      ]},
+    { id:"106", title:"Preventive Medicine Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","MANMED NAVMED P-117","NMCPHC-TM-PM 6220","NAVMED P-5010","BUMEDINST 6220.12","NMCPHC-TM OM 6260","BUMEDINST 6550.9","NAVMEDINST 6224.8","SECNAVINST 6120.3","COMNAVSURFORINST 6000.1"],
+      items:[
+        {id:"106.1",text:"Explain duties of medical personnel relating to medical surveillance.",hint:"tags"},
+        {id:"106.2",text:"Explain duties relating to medical event reporting.",hint:"steps"},
+        {id:"106.3",text:"Discuss types of reporting requirements: urgent and routine.",hint:"comparison"},
+        {id:"106.4",text:"Describe medical reporting systems: DRSi, CHCS, TMIP, MRRS.",hint:"table"},
+        {id:"106.5",text:"Discuss command responsibilities for NAVENPVNTMEDU TWO, FIVE, SIX, SEVEN.",hint:"tags"},
+        {id:"106.6",text:"Discuss modes of transmission: direct, indirect, vector.",hint:"comparison"},
+        {id:"106.7",text:"Discuss types of infections: viral, bacterial, fungal, parasitic infestation.",hint:"comparison"},
+        {id:"106.8",text:"Discuss assessment criteria for environmental related injuries.",hint:"tags"},
+        {id:"106.9",text:"Discuss assessment criteria for: heat, cold, water, bites and stings, hypothermia.",hint:"comparison"},
+        {id:"106.10",text:"Discuss administering procedures for a tuberculin skin test (TST).",hint:"steps"},
+        {id:"106.11",text:"Describe procedures for documenting TST results.",hint:"steps"},
+        {id:"106.12",text:"Discuss occupational health surveillance: hearing conservation, heat stress, food service attendant, laundry.",hint:"table"}
+      ]},
+    { id:"107", title:"Immunization Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","BUMEDINST 6230.15","BUMEDINST 6550.9"],
+      items:[
+        {id:"107.1",text:"Discuss injection sites for: intramuscular (IM), subcutaneous (SQ), intradermal (ID).",hint:"comparison"},
+        {id:"107.2",text:"Discuss vaccine administration methods: IM, SQ, ID, oral, nasal gastric tube.",hint:"table"},
+        {id:"107.3",text:"Describe signs and symptoms of an adverse reaction.",hint:"tags"},
+        {id:"107.4",text:"Discuss types of treatment for adverse reactions.",hint:"steps"},
+        {id:"107.5",text:"Describe the type of treatment for anaphylactic reactions.",hint:"steps"},
+        {id:"107.6",text:"Explain the purpose of a VAERS report.",hint:"tags"}
+      ]},
+    { id:"108", title:"Pharmacology Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","MANMED NAVMED P-117 Ch21"],
+      items:[
+        {id:"108.1",text:"Explain the concepts of medication administration.",hint:"steps"},
+        {id:"108.2",text:"Explain medication factors: therapeutic dose, dosage range, weight-based dosing.",hint:"table"},
+        {id:"108.3",text:"Explain methods of administering medication: oral, parenteral, inhalation/nasal, topical, rectal, vaginal.",hint:"comparison"},
+        {id:"108.4",text:"Discuss the six rights and three checks of medication administration.",hint:"acronym"},
+        {id:"108.5",text:"Define drug classification.",hint:"tags"},
+        {id:"108.6",text:"Identify generic drugs by trade names: oxymetazoline, bismuth subsalicylate, acetylsalicylic acid, ibuprofen, acetaminophen, guaifenesin, pseudoephedrine, cyclobenzaprine, naproxen, activated charcoal, naloxone, epinephrine auto-injector.",hint:"table"},
+        {id:"108.7",text:"Discuss adverse reactions to medication and the reporting protocol.",hint:"steps"},
+        {id:"108.8",text:"Explain the difference between an adverse reaction and a side effect.",hint:"comparison"},
+        {id:"108.9",text:"Define contraindication.",hint:"tags"},
+        {id:"108.10",text:"Explain the procedure for processing medication administration utilizing EHR or single poly-script.",hint:"steps"}
+      ]},
+    { id:"109", title:"Laboratory Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","Phlebotomy Essentials 5th Ed (McCall/Tankersley)","AHLTA User Guide 3.3"],
+      items:[
+        {id:"109.1",text:"Discuss aseptic techniques: (a) medical (b) surgical.",hint:"comparison"},
+        {id:"109.2",text:"Discuss preparation of medical instruments for medical and surgical procedures.",hint:"comparison"},
+        {id:"109.3",text:"Explain specimen collection: urine, stool, throat culture, wound, sputum, blood culture.",hint:"table"},
+        {id:"109.4",text:"Describe the procedure for labeling a specimen.",hint:"steps"},
+        {id:"109.5",text:"Discuss the procedure for entering/submitting laboratory orders.",hint:"steps"},
+        {id:"109.6",text:"Explain purposes of basic lab tests: CBC, Chem 7, UA, lipids, glucose, culture.",hint:"table"},
+        {id:"109.7",text:"Describe patient ID verification procedures.",hint:"steps"},
+        {id:"109.8",text:"Discuss phlebotomy needle sizes and appropriate utilization.",hint:"table"},
+        {id:"109.9",text:"Discuss the 'order of draw' for multiple tubes.",hint:"steps"},
+        {id:"109.10",text:"Discuss specimen tube additives and their purpose.",hint:"table"},
+        {id:"109.11",text:"Explain each step of a venipuncture procedure.",hint:"steps"},
+        {id:"109.12",text:"Explain procedures for storing and transporting collected samples.",hint:"steps"},
+        {id:"109.13",text:"Explain procedure for processing specimens during electronic system downtime.",hint:"steps"}
+      ]},
+    { id:"110", title:"Medical Support Fundamentals", color:"var(--green)",
+      refs:["NAVEDTRA 14295B","NAVSUP P-485","BUMEDINST 3440.10","BUMEDINST 1500.29","BUMEDINST 6110.14","MRRS","COMNAVSURFORINST 6000.1","NAVMEDCOMINST 5360.1","BUMEDINST 6320.17","MILPERSMAN 1500-020","BUMEDINST 6300.10","DoD Directive 1300.22"],
+      items:[
+        {id:"110.1",text:"Discuss AMAL (Authorized Medical Allowance List) and ADAL (Authorized Dental Allowance List).",hint:"comparison"},
+        {id:"110.2",text:"Define Federal Supply Catalog terminology: bulk stock, consumable, equipage, material, standard stock, national stock number.",hint:"table"},
+        {id:"110.3",text:"Explain MRRS items: comprehensive individual entry, IMR report, command/unit medical readiness report.",hint:"table"},
+        {id:"110.4",text:"Describe steps to prepare: (a) IMR report (b) unit report.",hint:"steps"},
+        {id:"110.5",text:"Discuss first aid principles: puncture/penetrating wound, sucking chest wound, abdominal evisceration, hemorrhage, amputation, laceration, fractures, environmental injuries, burns (1st/2nd/3rd degree), hypothermia, heat injuries, electrical shock, smoke inhalation.",hint:"tags"},
+        {id:"110.6",text:"Discuss personnel roles/responsibilities during mass casualty & triage drills.",hint:"tags"},
+        {id:"110.7",text:"Discuss required information to complete a birth certificate.",hint:"table"},
+        {id:"110.8",text:"Discuss required information to complete a death certificate.",hint:"table"},
+        {id:"110.9",text:"Discuss decedent affairs forms.",hint:"tags"},
+        {id:"110.10",text:"Discuss mortuary services for post-mortem care: preservation, transportation, disposition instructions.",hint:"steps"},
+        {id:"110.11",text:"Discuss patient process initiatives: partnership for patients, patient safety report, patient survey tools.",hint:"comparison"},
+        {id:"110.12",text:"Discuss concepts and resources for patient care process improvement activities.",hint:"tags"}
+      ]}
+  ],
+  systems: [
+    { id:"201", title:"Military Medical Equipment", color:"var(--blue)",
+      refs:["Zoll Defibrillator Operators Guide","ECG Analysis System Operator's Manual","Welch Allyn Spot Vital Signs Operator's Manual","Alaris Unit System Operator's Manual","Pulmo-Aide Compressor Nebulizer System Operators Guide"],
+      items:[
+        {id:"201.1.1",text:"Defibrillator — location, function, power sources, modes of operation, consumables, safety devices.",hint:"table"},
+        {id:"201.1.2",text:"Vital Signs Machine — location, function, power sources, modes of operation, consumables, safety devices.",hint:"table"},
+        {id:"201.1.3",text:"IV Pump Unit System — location, function, power sources, modes of operation, consumables, safety devices.",hint:"table"},
+        {id:"201.1.4",text:"Nebulizer Unit — location, function, power sources, modes of operation, consumables, safety devices.",hint:"table"},
+        {id:"201.1.5",text:"ECG Analysis System — location, function, power sources, modes of operation, consumables, safety devices.",hint:"table"},
+        {id:"201.2.1",text:"What malfunction indications are received from: defibrillator, vital signs machine, IV pump, nebulizer, ECG system?",hint:"table"},
+        {id:"201.5.1",text:"What safety precautions must be observed when operating/handling all five equipment types?",hint:"comparison"}
+      ]}
+  ],
+  watchstations: [
+    { id:"301", title:"Administration Corpsman", color:"var(--amber)",
+      refs:["NAVMEDCOMINST 6320.16","NAVEDTRA 14295B","MANMED NAVMED P-117 Ch16","AHLTA User Guide 3.3","MRRS","BUMEDINST 6110.14"],
+      items:[
+        {id:"301.2.1",text:"Create a health record.",hint:"steps"},
+        {id:"301.2.2",text:"Document health record entries.",hint:"steps"},
+        {id:"301.2.3",text:"Perform an annual health records verification.",hint:"steps"},
+        {id:"301.2.4",text:"Update the Privacy Act statement (DD Form 2005).",hint:"steps"},
+        {id:"301.2.5",text:"Demonstrate how to close a health record.",hint:"steps"},
+        {id:"301.2.6",text:"Schedule patient appointment entry using AHLTA/CHCS.",hint:"steps"},
+        {id:"301.2.7",text:"Document a telephone consult using AHLTA/CHCS.",hint:"steps"},
+        {id:"301.2.8",text:"Conduct end of day processing.",hint:"steps"},
+        {id:"301.2.9",text:"Manage patient recall appointment roster.",hint:"steps"},
+        {id:"301.2.10",text:"Review in-patient charts for continuity.",hint:"steps"},
+        {id:"301.3.1",text:"Prepare personnel, unit, and command medical readiness report.",hint:"steps"}
+      ]},
+    { id:"302", title:"Patient Care Corpsman", color:"var(--amber)",
+      refs:["NAVEDTRA 14295B","BUMEDINST 6550.9","Seidel's Guide 8th Ed","Mosby Online Clinical Skills","BUMEDINST 6280.1","BUMEDINST 6230.15","MANMED NAVMED P-117 Ch21"],
+      items:[
+        {id:"302.2.1",text:"Perform patient screening of presenting illnesses and conditions.",hint:"steps"},
+        {id:"302.2.2",text:"Conduct a patient interview using OLDCARTS and OPQRST.",hint:"acronym"},
+        {id:"302.2.3",text:"Obtain complete patient medical history using Review of Systems (ROS).",hint:"steps"},
+        {id:"302.2.4",text:"Obtain vital signs.",hint:"steps"},
+        {id:"302.2.5",text:"Obtain orthostatic blood pressure.",hint:"steps"},
+        {id:"302.2.6",text:"Document patient care using SOAP note format.",hint:"acronym"},
+        {id:"302.2.7",text:"Document patient medical history & information.",hint:"steps"},
+        {id:"302.2.8",text:"Perform Electrocardiogram (EKG/ECG).",hint:"steps"},
+        {id:"302.2.9",text:"Perform a HEENT system physical examination.",hint:"steps"},
+        {id:"302.2.10",text:"Perform a cardiovascular system physical examination.",hint:"steps"},
+        {id:"302.2.11",text:"Perform a pulmonary system physical examination.",hint:"steps"},
+        {id:"302.2.12",text:"Perform an abdominal system physical examination.",hint:"steps"},
+        {id:"302.2.13",text:"Perform a gastrointestinal system physical examination.",hint:"steps"},
+        {id:"302.2.14",text:"Perform a genitourinary system physical examination.",hint:"steps"},
+        {id:"302.2.15",text:"Perform a musculoskeletal system physical examination.",hint:"steps"},
+        {id:"302.2.16",text:"Perform a dermatologic system physical examination.",hint:"steps"},
+        {id:"302.2.17",text:"Perform a neurologic system physical examination.",hint:"steps"},
+        {id:"302.2.18",text:"Perform a dental system physical examination.",hint:"steps"},
+        {id:"302.2.19",text:"Perform an endocrine system physical examination.",hint:"steps"},
+        {id:"302.2.20",text:"Perform a mental health physical examination.",hint:"steps"},
+        {id:"302.2.21",text:"Assess vital signs, interpret, and report abnormal values.",hint:"table"},
+        {id:"302.2.22",text:"Perform primary and secondary trauma exam utilizing DCAP-BTLS.",hint:"acronym"},
+        {id:"302.2.23",text:"Demonstrate the use of medical equipment.",hint:"table"},
+        {id:"302.2.24",text:"Perform and measure visual acuity using Snellen chart.",hint:"steps"},
+        {id:"302.2.25",text:"Administer intravenous (IV) therapies.",hint:"steps"},
+        {id:"302.2.26",text:"Monitor IV therapies for adverse reactions.",hint:"table"},
+        {id:"302.2.27",text:"Collect a CBC laboratory specimen.",hint:"steps"},
+        {id:"302.2.28",text:"Collect a Chem 7 laboratory specimen.",hint:"steps"},
+        {id:"302.2.29",text:"Collect a UA laboratory specimen.",hint:"steps"},
+        {id:"302.2.30",text:"Collect a lipids laboratory specimen.",hint:"steps"},
+        {id:"302.2.31",text:"Collect a glucose laboratory specimen.",hint:"steps"},
+        {id:"302.2.32",text:"Collect a culture laboratory specimen.",hint:"steps"},
+        {id:"302.2.33",text:"Perform venipuncture procedure.",hint:"steps"},
+        {id:"302.2.34",text:"Apply specimen labels.",hint:"steps"},
+        {id:"302.2.35",text:"Prepare temperature sensitive items for transport.",hint:"steps"},
+        {id:"302.2.36",text:"Prepare medication prescription using EHR or single polyscript.",hint:"steps"},
+        {id:"302.2.37",text:"Administer IM injections.",hint:"steps"},
+        {id:"302.2.38",text:"Administer ID injections.",hint:"steps"},
+        {id:"302.2.39",text:"Administer nasal medications.",hint:"steps"},
+        {id:"302.2.40",text:"Administer oral medications.",hint:"steps"},
+        {id:"302.2.41",text:"Administer nebulizer treatments.",hint:"steps"},
+        {id:"302.2.42",text:"Administer SQ injections.",hint:"steps"},
+        {id:"302.2.43",text:"Administer medication via nasogastric tube.",hint:"steps"},
+        {id:"302.2.44",text:"Administer rectal medications.",hint:"steps"},
+        {id:"302.2.45",text:"Perform medication verification checks utilizing six rights.",hint:"acronym"},
+        {id:"302.2.46",text:"Perform alarm, temperature check, and external audio check for vaccine refrigerator.",hint:"steps"},
+        {id:"302.2.47",text:"Monitor patient for drug adverse reaction.",hint:"table"},
+        {id:"302.2.48",text:"Assess patient for side effects to medication.",hint:"table"},
+        {id:"302.2.49",text:"Conduct patient education on diagnosis, treatment, and plan.",hint:"steps"},
+        {id:"302.2.50",text:"Conduct patient education on health & wellness plan.",hint:"tags"},
+        {id:"302.2.51",text:"Manage regulated medical waste for disposal.",hint:"steps"},
+        {id:"302.3.1",text:"Assist in incision and drainage (I&D) of an infected area.",hint:"steps"},
+        {id:"302.3.2",text:"Document patient intake and output (I&O).",hint:"steps"},
+        {id:"302.3.3",text:"Set up sterile trays and packs for minor procedure.",hint:"steps"},
+        {id:"302.3.4",text:"Perform infection control procedures.",hint:"steps"},
+        {id:"302.3.5",text:"Perform universal precaution measures in contact transmission.",hint:"steps"},
+        {id:"302.3.6",text:"Document 'Time Out' prior to minor surgical procedures.",hint:"steps"},
+        {id:"302.3.7",text:"Assist with: ingrown toenail, skin biopsy, localized cryotherapy, sutures, staples.",hint:"steps"},
+        {id:"302.3.8",text:"Perform a urinary catheter procedure under supervision.",hint:"steps"},
+        {id:"302.3.9",text:"Perform urinary catheter management care.",hint:"steps"},
+        {id:"302.3.10",text:"Discontinue urinary catheter.",hint:"steps"},
+        {id:"302.3.11",text:"Educate patients on prescribed diets.",hint:"table"},
+        {id:"302.3.12",text:"Apply and assess tourniquet placement.",hint:"steps"},
+        {id:"302.3.13",text:"Perform wound management & dressing change.",hint:"steps"},
+        {id:"302.3.14",text:"Evaluate patients for environmental injuries: heat, cold, water, bites/stings, hypothermia.",hint:"comparison"},
+        {id:"302.3.15",text:"Evaluate patients for external/internal hemorrhaging.",hint:"steps"},
+        {id:"302.3.16",text:"Treat patient for shock.",hint:"steps"},
+        {id:"302.3.17",text:"Assess patient for soft tissue injuries & blunt force trauma.",hint:"steps"},
+        {id:"302.3.18",text:"Assess patient for penetrating wounds.",hint:"steps"},
+        {id:"302.3.19",text:"Assess patient conditions for cardiopulmonary emergencies.",hint:"steps"},
+        {id:"302.3.20",text:"Assist in treatment of acute drug intoxications/poisoning.",hint:"steps"},
+        {id:"302.3.21",text:"Prepare isolation barriers for patient isolation rooms.",hint:"steps"},
+        {id:"302.3.22",text:"Prepare isolation requirements for patient admission.",hint:"steps"},
+        {id:"302.3.23",text:"Assist with dry socket flushing.",hint:"steps"},
+        {id:"302.3.24",text:"Prepare color perception test.",hint:"steps"}
+      ]},
+    { id:"303", title:"Medical Readiness Corpsman", color:"var(--amber)",
+      refs:["NAVEDTRA 14295B","BUMEDINST 6230.15","BUMEDINST 6550.9","BUMEDINST 3440.10","COMNAVSURFORINST 6000.1","BUMEDINST 6110.14","MRRS"],
+      items:[
+        {id:"303.2.1",text:"Update personnel medical readiness status using applicable program of record.",hint:"steps"},
+        {id:"303.2.2",text:"Conduct first aid training for puncture/penetrating wound.",hint:"steps"},
+        {id:"303.2.3",text:"Perform a triage scenario with five casualties.",hint:"steps"},
+        {id:"303.2.4",text:"Conduct first aid training for sucking chest wound.",hint:"steps"},
+        {id:"303.2.5",text:"Conduct first aid training for abdominal evisceration.",hint:"steps"},
+        {id:"303.2.6",text:"Conduct first aid training for internal and external hemorrhage.",hint:"steps"},
+        {id:"303.2.7",text:"Conduct first aid training for amputation.",hint:"steps"},
+        {id:"303.2.8",text:"Conduct first aid training for laceration.",hint:"steps"},
+        {id:"303.2.9",text:"Conduct first aid training for open and closed fractures.",hint:"steps"},
+        {id:"303.2.10",text:"Conduct first aid training for environmental injuries.",hint:"comparison"},
+        {id:"303.2.11",text:"Conduct first aid training for first, second, and third degree burns.",hint:"comparison"},
+        {id:"303.2.12",text:"Conduct first aid training for hypothermia.",hint:"steps"},
+        {id:"303.2.13",text:"Conduct first aid training for heat cramps, heat exhaustion, and heat stroke.",hint:"comparison"},
+        {id:"303.2.14",text:"Conduct first aid training for electrical shock.",hint:"steps"},
+        {id:"303.2.15",text:"Conduct first aid training for smoke inhalation.",hint:"steps"}
+      ]}
+  ]
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+let apiKey    = localStorage.getItem('hm_pqs_apikey') || '';
+let doneItems = JSON.parse(localStorage.getItem('hm_pqs_done') || '{}');
+let briefCache = {};
+let currentTab = 'fundamentals';
+
+function init() {
+  if (!apiKey) document.getElementById('apiModal').classList.add('open');
+  renderAll();
+  updateProgress();
+}
+
+function saveApiKey() {
+  const val = document.getElementById('apiKeyInput').value.trim();
+  if (!val.startsWith('sk-')) { showToast('⚠ Invalid key format'); return; }
+  apiKey = val;
+  localStorage.setItem('hm_pqs_apikey', val);
+  document.getElementById('apiModal').classList.remove('open');
+  showToast('✓ API key saved');
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderAll() {
+  renderPanel('fundamentals', PQS.fundamentals);
+  renderPanel('systems',      PQS.systems);
+  renderPanel('watchstations',PQS.watchstations);
+  updateBadges();
+}
+
+function renderPanel(tabId, sections) {
+  document.getElementById(`panel-${tabId}`).innerHTML = sections.map(s => renderSection(s)).join('');
+}
+
+function renderSection(sec) {
+  const total = sec.items.length;
+  const done  = sec.items.filter(i => doneItems[i.id]).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+  return `
+  <div class="section-block" id="sec-${sec.id}">
+    <div class="section-header" onclick="toggleSection('${sec.id}')">
+      <div class="section-num" style="color:${sec.color}">${sec.id}</div>
+      <div class="section-title">${sec.title}</div>
+      <div class="section-meta">
+        <div class="section-progress-mini">
+          <div class="section-progress-fill" id="sfill-${sec.id}" style="width:${pct}%;background:${sec.color}"></div>
+        </div>
+        <div class="section-count" id="scount-${sec.id}">${done}/${total}</div>
+        <div class="section-chevron">▶</div>
+      </div>
+    </div>
+    <div class="section-items">${sec.items.map(item => renderItem(item)).join('')}</div>
+  </div>`;
+}
+
+function renderItem(item) {
+  const done = doneItems[item.id];
+  return `
+  <div class="line-item${done?' done':''}" id="item-${item.id}">
+    <div class="item-row">
+      <div class="item-id">${item.id}</div>
+      <div class="item-text">${item.text}</div>
+      <div class="item-actions">
+        <button class="done-btn" onclick="toggleDone('${item.id}',event)">${done?'✓':'○'}</button>
+        <button class="study-btn" onclick="toggleStudy('${item.id}',event)">STUDY</button>
+      </div>
+    </div>
+    <div class="study-panel" id="study-${item.id}"></div>
+  </div>`;
+}
+
+// ── DONE TRACKING ─────────────────────────────────────────────
+function toggleDone(itemId, e) {
+  e.stopPropagation();
+  doneItems[itemId] = !doneItems[itemId];
+  if (!doneItems[itemId]) delete doneItems[itemId];
+  localStorage.setItem('hm_pqs_done', JSON.stringify(doneItems));
+  const el  = document.getElementById(`item-${itemId}`);
+  const btn = el.querySelector('.done-btn');
+  if (doneItems[itemId]) {
+    el.classList.add('done'); btn.textContent = '✓';
+    el.querySelector('.item-id').style.color = 'var(--green)';
+  } else {
+    el.classList.remove('done'); btn.textContent = '○';
+    el.querySelector('.item-id').style.color = '';
+  }
+  updateSectionProgress(itemId);
+  updateProgress();
+}
+
+function updateSectionProgress(itemId) {
+  const allSecs = [...PQS.fundamentals,...PQS.systems,...PQS.watchstations];
+  const sec = allSecs.find(s => s.items.some(i => i.id === itemId));
+  if (!sec) return;
+  const total = sec.items.length;
+  const done  = sec.items.filter(i => doneItems[i.id]).length;
+  const pct   = total ? Math.round((done/total)*100) : 0;
+  const fill  = document.getElementById(`sfill-${sec.id}`);
+  const count = document.getElementById(`scount-${sec.id}`);
+  if (fill)  fill.style.width  = pct + '%';
+  if (count) count.textContent = `${done}/${total}`;
+}
+
+// ── STUDY PANEL ───────────────────────────────────────────────
+function toggleSection(id) {
+  document.getElementById(`sec-${id}`).classList.toggle('expanded');
+}
+
+function toggleStudy(itemId, e) {
+  e.stopPropagation();
+  const panel = document.getElementById(`study-${itemId}`);
+  if (panel.classList.contains('open')) { panel.classList.remove('open'); return; }
+  panel.classList.add('open');
+  if (!panel.innerHTML.trim()) loadStudyBrief(itemId, panel);
+}
+
+async function loadStudyBrief(itemId, panel) {
+  if (!apiKey) {
+    panel.innerHTML = `<div class="study-error">⚠️ No API key set. Click ⚙ API KEY to add yours.</div>`;
+    return;
+  }
+  const allItems = [...PQS.fundamentals,...PQS.systems,...PQS.watchstations]
+    .flatMap(s => s.items.map(i => ({...i, secRefs:s.refs, secTitle:s.title})));
+  const item = allItems.find(i => i.id === itemId);
+  if (!item) return;
+
+  panel.innerHTML = `<div class="study-loading"><span class="loading-dots">Generating study brief</span></div>`;
+
+  const prompt = `You are an expert Hospital Corpsman instructor helping a student study NAVEDTRA 43699-2A (Hospital Corpsman PQS).
+
+Generate a study brief for this PQS line item:
+ID: ${item.id}
+Topic: "${item.text}"
+Section: ${item.secTitle}
+Source references: ${item.secRefs.join(', ')}
+Suggested visual type: ${item.hint}
+
+Return ONLY valid JSON (no markdown, no extra text) with this exact structure:
+{
+  "summary": "2-3 sentence plain-English explanation of the concept",
+  "references": [{"citation": "exact citation", "name": "plain-English name"}],
+  "visual": {
+    "type": "one of: acronym|steps|table|comparison|flow|tags",
+    "title": "short descriptive title",
+    "data": {}
+  },
+  "mnemonic": "a helpful mnemonic, acronym expansion, or memory tip",
+  "keyPoints": ["5 specific bullet points a qualifier expects you to know"],
+  "whyItMatters": "1-2 sentences on clinical/operational relevance",
+  "qualifyTips": ["3 specific things to say or demonstrate to get this line item signed off"]
+}
+Visual data shapes:
+- acronym: {"letters": [{"letter": "O", "meaning": "Onset — when did it start?"}]}
+- steps: {"steps": ["Step 1 text", "Step 2 text"]}
+- table: {"headers": ["Col1", "Col2"], "rows": [["val", "val"]]}
+- comparison: {"items": [{"name": "Type A", "color": "#007a42", "points": ["point 1"]}]}
+- flow: {"boxes": ["Box 1 text", "Box 2 text"]}
+- tags: {"groups": [{"label": "Group Name", "color": "#005fa3", "items": ["item1", "item2"]}]}
+For acronyms like OLDCARTS, OPQRST, DCAP-BTLS, SOAP — always use type "acronym".
+Return ONLY the JSON object.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:1500, messages:[{role:'user',content:prompt}] })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}));
+      panel.innerHTML = `<div class="study-error">⚠️ API Error ${res.status}: ${err.error?.message||'Unknown error'}.</div>`;
+      return;
+    }
+    const data  = await res.json();
+    const raw   = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g,'').trim();
+    const brief = JSON.parse(clean);
+    briefCache[itemId] = {brief, item};
+    panel.innerHTML = renderBrief(brief, itemId);
+  } catch (err) {
+    panel.innerHTML = `<div class="study-error">⚠️ Error: ${err.message}. Check your API key and network.</div>`;
+  }
+}
+
+// ── RENDER BRIEF ──────────────────────────────────────────────
+function renderBrief(b, itemId) {
+  return `
+  <div class="export-bar">
+    <button class="export-btn" id="exportBtn-${itemId}" onclick="exportBrief('${itemId}')">
+      📋 Copy as Text
+    </button>
+  </div>
+  <div class="study-grid">
+    <div class="study-card full">
+      <div class="card-label green">SUMMARY</div>
+      <div class="card-text">${escHtml(b.summary)}</div>
+    </div>
+    <div class="study-card">
+      <div class="card-label blue">REFERENCES</div>
+      <div class="ref-list">${(b.references||[]).map(r=>`
+        <div class="ref-pill">
+          <div class="ref-code">${escHtml(r.citation)}</div>
+          <div class="ref-name">${escHtml(r.name)}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="study-card">
+      <div class="card-label purple">REMEMBER THIS</div>
+      <div class="mnemonic-box">${escHtml(b.mnemonic||'')}</div>
+    </div>
+    <div class="study-card full">
+      <div class="card-label amber">VISUAL — ${escHtml((b.visual?.title||'').toUpperCase())}</div>
+      ${renderVisual(b.visual)}
+    </div>
+    <div class="study-card">
+      <div class="card-label green">KEY POINTS</div>
+      <ul class="key-points">${(b.keyPoints||[]).map(p=>`<li>${escHtml(p)}</li>`).join('')}</ul>
+    </div>
+    <div class="study-card">
+      <div class="card-label amber">FOR SIGN-OFF</div>
+      <div class="qualify-list">${(b.qualifyTips||[]).map((t,i)=>`
+        <div class="qualify-item">
+          <div class="qualify-num">${i+1}</div>
+          <div>${escHtml(t)}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    ${b.whyItMatters?`<div class="study-card full">
+      <div class="card-label red">WHY IT MATTERS</div>
+      <div class="card-text">${escHtml(b.whyItMatters)}</div>
+    </div>`:''}
+  </div>`;
+}
+
+// ── EMOJI EXPORT ──────────────────────────────────────────────
+function exportBrief(itemId) {
+  const cached = briefCache[itemId];
+  if (!cached) { showToast('⚠ No brief loaded yet'); return; }
+  const { brief: b, item } = cached;
+  const title = item ? `${item.id} — ${item.text}` : itemId;
+
+  const lines = [];
+  lines.push(`📘 HM PQS STUDY BRIEF`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`🆔 ${title}`);
+  lines.push(``);
+
+  lines.push(`📝 SUMMARY`);
+  lines.push(b.summary || '');
+  lines.push(``);
+
+  if (b.references?.length) {
+    lines.push(`📚 REFERENCES`);
+    b.references.forEach(r => lines.push(`  📌 ${r.citation} — ${r.name}`));
+    lines.push(``);
+  }
+
+  const v = b.visual;
+  if (v) {
+    lines.push(`🗺️ ${(v.title||'VISUAL').toUpperCase()}`);
+    const d = v.data || {};
+    if (v.type === 'acronym' && d.letters)
+      d.letters.forEach(l => lines.push(`  ${l.letter}  →  ${l.meaning}`));
+    else if (v.type === 'steps' && d.steps)
+      d.steps.forEach((s,i) => lines.push(`  ${i+1}. ${s}`));
+    else if (v.type === 'table' && d.headers) {
+      lines.push(`  ${d.headers.join(' | ')}`);
+      lines.push(`  ${'─'.repeat(60)}`);
+      (d.rows||[]).forEach(r => lines.push(`  ${r.join(' | ')}`));
+    } else if (v.type === 'comparison' && d.items)
+      d.items.forEach(it => {
+        lines.push(`  ▪ ${it.name}`);
+        (it.points||[]).forEach(p => lines.push(`    · ${p}`));
+      });
+    else if (v.type === 'flow' && d.boxes)
+      d.boxes.forEach((bx,i) => { lines.push(`  ${bx}`); if (i<d.boxes.length-1) lines.push(`  ↓`); });
+    else if (v.type === 'tags' && d.groups)
+      d.groups.forEach(g => lines.push(`  🏷️ ${g.label}: ${(g.items||[]).join(', ')}`));
+    lines.push(``);
+  }
+
+  if (b.mnemonic) {
+    lines.push(`🧠 REMEMBER THIS`);
+    lines.push(b.mnemonic);
+    lines.push(``);
+  }
+
+  if (b.keyPoints?.length) {
+    lines.push(`✅ KEY POINTS`);
+    b.keyPoints.forEach(p => lines.push(`  • ${p}`));
+    lines.push(``);
+  }
+
+  if (b.qualifyTips?.length) {
+    lines.push(`✍️ FOR SIGN-OFF`);
+    b.qualifyTips.forEach((t,i) => lines.push(`  ${i+1}. ${t}`));
+    lines.push(``);
+  }
+
+  if (b.whyItMatters) {
+    lines.push(`⚕️ WHY IT MATTERS`);
+    lines.push(b.whyItMatters);
+    lines.push(``);
+  }
+
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`📖 NAVEDTRA 43699-2A — Hospital Corpsman PQS`);
+
+  const text = lines.join('\n');
+
+  const copyIt = () => {
+    const btn = document.getElementById(`exportBtn-${itemId}`);
+    if (btn) {
+      btn.classList.add('copied');
+      btn.textContent = '✓ Copied to clipboard!';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '📋 Copy as Text'; }, 2400);
+    }
+    showToast('✓ Copied to clipboard!');
+  };
+
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(copyIt).catch(() => fallbackCopy(text, copyIt));
+  } else {
+    fallbackCopy(text, copyIt);
+  }
+}
+
+function fallbackCopy(text, callback) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); callback(); } catch(e) { showToast('⚠ Copy failed — try a modern browser'); }
+  document.body.removeChild(ta);
+}
+
+// ── RENDER VISUAL ─────────────────────────────────────────────
+function renderVisual(v) {
+  if (!v) return '<div style="color:var(--text3);font-size:15px">No visual data</div>';
+  const d = v.data || {};
+  const colorPool = ['#005fa3','#007a42','#7a4800','#5b1a96','#b52a1c','#0077aa'];
+  switch (v.type) {
+    case 'acronym':
+      return `<div class="acronym-grid">${(d.letters||[]).map((l,i)=>`
+        <div class="acronym-row">
+          <div class="acro-letter" style="color:${colorPool[i%colorPool.length]}">${escHtml(l.letter)}</div>
+          <div class="acro-meaning">${escHtml(l.meaning)}</div>
+        </div>`).join('')}</div>`;
+    case 'steps':
+      return `<div class="steps-list">${(d.steps||[]).map((s,i)=>`
+        <div class="step-row">
+          <div class="step-num">${i+1}</div>
+          <div class="step-text">${escHtml(s)}</div>
+        </div>`).join('')}</div>`;
+    case 'table':
+      return `<table class="visual-table">
+        <thead><tr>${(d.headers||[]).map(h=>`<th>${escHtml(h)}</th>`).join('')}</tr></thead>
+        <tbody>${(d.rows||[]).map(r=>`<tr>${r.map(c=>`<td>${escHtml(String(c))}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table>`;
+    case 'comparison':
+      return `<div class="comparison-grid">${(d.items||[]).map(it=>`
+        <div class="comp-card">
+          <div class="comp-header" style="background:${it.color||'#e8f3fc'}22;color:${it.color||'var(--blue)'};border-bottom:2px solid ${it.color||'var(--blue)'}40">${escHtml(it.name)}</div>
+          <div class="comp-points">${(it.points||[]).map(p=>`<div class="comp-pt">${escHtml(p)}</div>`).join('')}</div>
+        </div>`).join('')}</div>`;
+    case 'flow':
+      return `<div class="flow-list">${(d.boxes||[]).map((bx,i)=>`
+        <div class="flow-box">${escHtml(bx)}</div>
+        ${i<(d.boxes.length-1)?'<div class="flow-arrow">↓</div>':''}`).join('')}</div>`;
+    case 'tags':
+      return `<div class="tags-groups">${(d.groups||[]).map(g=>`
+        <div>
+          <div class="tag-group-label" style="color:${g.color||'var(--blue)'}">${escHtml(g.label)}</div>
+          <div class="tag-items">${(g.items||[]).map(it=>`
+            <div class="tag-item" style="color:${g.color||'var(--blue)'};border-color:${g.color||'var(--border2)'}60;background:${g.color||'transparent'}14">${escHtml(it)}</div>`).join('')}</div>
+        </div>`).join('')}</div>`;
+    default:
+      return `<div style="color:var(--text3);font-size:15px">Visual type: ${escHtml(v.type||'unknown')}</div>`;
+  }
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────
+function updateProgress() {
+  const allItems = [...PQS.fundamentals,...PQS.systems,...PQS.watchstations].flatMap(s=>s.items);
+  const total = allItems.length;
+  const done  = allItems.filter(i=>doneItems[i.id]).length;
+  document.getElementById('globalProgressBar').style.width = total?`${Math.round((done/total)*100)}%`:'0%';
+  document.getElementById('globalProgressLabel').textContent = `${done} / ${total}`;
+  updateBadges();
+}
+
+function updateBadges() {
+  const calc = secs => { const a=secs.flatMap(s=>s.items); return `${a.filter(i=>doneItems[i.id]).length}/${a.length}`; };
+  document.getElementById('badge-fundamentals').textContent  = calc(PQS.fundamentals);
+  document.getElementById('badge-systems').textContent       = calc(PQS.systems);
+  document.getElementById('badge-watchstations').textContent = calc(PQS.watchstations);
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active',p.id===`panel-${tab}`));
+}
+
+function escHtml(str) {
+  if (typeof str!=='string') return String(str||'');
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+init();
+</script>
+</body>
+</html>
